@@ -1,0 +1,16 @@
+# one service, one port, no drama pyon.
+# binds to 127.0.0.1 by default - assumes a reverse proxy (caddy / nginx /
+# traefik / whatever) sits in front and forwards to it. if you actually
+# want this exposed on the host, swap to "3000:3000".
+
+services:
+  pyon:
+    build: .
+    image: pyon:latest
+    container_name: pyon
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PYON_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000

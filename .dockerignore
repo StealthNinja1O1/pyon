@@ -1,0 +1,19 @@
+# keep build context lean pyon
+node_modules
+out
+dist
+.git
+.gitignore
+.env
+.env.*
+*.log
+
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# meta
+Dockerfile
+docker-compose.yml
+.dockerignore
