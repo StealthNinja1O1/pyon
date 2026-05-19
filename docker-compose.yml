@@ -19,3 +19,6 @@ services:
       PYON_KEY: ${PYON_KEY:-}
       # reverse proxy 越し前提なので x-forwarded-for 信用. 直公開に切り替えるなら 0 にする
       TRUST_PROXY: ${TRUST_PROXY:-1}
+      # avatar fetchで許可するhost. 空ならcode側のdefault (discord CDN) が効く.
+      # 増やすときは「全部書く」スタイル pyon: cdn.discordapp.com,media.discordapp.net,other.example
+      PYON_AVATAR_ALLOWED_HOSTS: ${PYON_AVATAR_ALLOWED_HOSTS:-}

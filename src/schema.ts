@@ -1,13 +1,15 @@
 import { z } from "zod";
+import { isAllowedAvatarUrl } from "./allowlist";
 
 // soft cap pyon. 500文字超えたらlayoutが先に詰む (text wrappingが死ぬ)
 const MAX_TEXT = 500;
 const MAX_NAME = 80;
 
+// https + allowlistedなhost のみ. SSRF対策の一段目pyon. 二段目は avatar.ts の redirect手動check
 const httpsUrl = z
   .string()
   .url()
-  .refine((u) => u.startsWith("https://"), "avatarUrl must be https");
+  .refine(isAllowedAvatarUrl, "avatarUrl must be https and host on allowlist");
 
 const hexColor = z
   .string()
