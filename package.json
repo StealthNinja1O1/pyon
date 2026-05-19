@@ -1,0 +1,26 @@
+{
+  "name": "pyon",
+  "version": "0.1.0",
+  "description": "quote card renderer. pyon.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/fraunces": "^5.2.9",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/newsreader": "^5.2.10",
+    "@resvg/resvg-js": "^2.6.2",
+    "react": "^19.2.6",
+    "satori": "^0.10.13",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.5.0"
+  }
+}

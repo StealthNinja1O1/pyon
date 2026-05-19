@@ -1,0 +1,23 @@
+# deps
+node_modules/
+
+# build
+dist/
+
+# local test renders pyon
+out/
+
+# env
+.env
+.env.local
+
+# editors
+.vscode/
+.idea/
+
+# os litter
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
