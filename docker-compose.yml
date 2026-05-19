@@ -22,3 +22,20 @@ services:
       # avatar fetchで許可するhost. 空ならcode側のdefault (discord CDN) が効く.
       # 増やすときは「全部書く」スタイル pyon: cdn.discordapp.com,media.discordapp.net,other.example
       PYON_AVATAR_ALLOWED_HOSTS: ${PYON_AVATAR_ALLOWED_HOSTS:-}
+      # render の同時実行 cap. 越えたら 503 (queueはしない). mecha スペックに合わせて調整 pyon
+      PYON_MAX_CONCURRENT: ${PYON_MAX_CONCURRENT:-4}
+      # 1 request の全体 timeout. 越えたら 504. 普通は 1s 以下で終わる
+      PYON_REQ_TIMEOUT_MS: ${PYON_REQ_TIMEOUT_MS:-15000}
+    # blast radius 縮める hardening pyon. アプリは fs write 一切しない (no disk writes ever)
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M

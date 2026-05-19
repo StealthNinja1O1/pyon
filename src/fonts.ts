@@ -13,7 +13,9 @@ export type FontSpec = {
   style: "normal" | "italic";
 };
 
-let cache: FontSpec[] | null = null;
+// promise自体をcacheする pyon. result じゃない理由:
+// concurrent な初回呼び出しでもPromise.all 一回しか走らない (thundering herd 回避)
+let cachePromise: Promise<FontSpec[]> | null = null;
 
 async function load(family: string, file: string): Promise<ArrayBuffer> {
   const path = `${FONTSOURCE}/${family}/files/${file}`;
@@ -26,9 +28,19 @@ async function load(family: string, file: string): Promise<ArrayBuffer> {
   return await f.arrayBuffer();
 }
 
-export async function getFonts(): Promise<FontSpec[]> {
-  if (cache) return cache;
+export function getFonts(): Promise<FontSpec[]> {
+  if (!cachePromise) {
+    const p = loadFonts();
+    cachePromise = p;
+    // 失敗promiseが居座ると永遠にretryできなくなるので、rejection時はcacheクリア pyon
+    p.catch(() => {
+      if (cachePromise === p) cachePromise = null;
+    });
+  }
+  return cachePromise;
+}
 
+async function loadFonts(): Promise<FontSpec[]> {
   const [
     interRegular,
     interSemibold,
@@ -43,12 +55,11 @@ export async function getFonts(): Promise<FontSpec[]> {
     load("newsreader", "newsreader-latin-400-normal.woff"),
   ]);
 
-  cache = [
+  return [
     { name: "Inter", data: interRegular, weight: 400, style: "normal" },
     { name: "Inter", data: interSemibold, weight: 600, style: "normal" },
     { name: "Fraunces", data: frauncesLight, weight: 300, style: "normal" },
     { name: "Fraunces", data: frauncesRegular, weight: 400, style: "normal" },
     { name: "Newsreader", data: newsreaderRegular, weight: 400, style: "normal" },
   ];
-  return cache;
 }
