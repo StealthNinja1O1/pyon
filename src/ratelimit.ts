@@ -2,10 +2,10 @@
 
 type Bucket = { tokens: number; last: number };
 
-const CAPACITY = 10;            // burstはここまで許す pyon
-const REFILL_PER_MS = 10 / 1000; // 平均 10 req/sec/IP
+const CAPACITY = 10;
+const REFILL_PER_MS = 10 / 1000; // 10 req/sec/IP pyon
 const SWEEP_MS = 60_000;
-const IDLE_MS = 5 * 60_000;     // 5min触ってないbucketは捨てる
+const IDLE_MS = 5 * 60_000;
 
 const buckets = new Map<string, Bucket>();
 
@@ -18,7 +18,6 @@ export function rateLimitOk(ip: string): boolean {
     return true;
   }
 
-  // 経過時間ぶん 補充. capacity 超えない
   const elapsed = now - b.last;
   b.tokens = Math.min(CAPACITY, b.tokens + elapsed * REFILL_PER_MS);
   b.last = now;

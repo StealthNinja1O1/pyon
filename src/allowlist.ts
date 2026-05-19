@@ -1,6 +1,4 @@
-// avatarUrl 受け入れる host のallowlist pyon.
-// env で上書きできるけど、未設定なら discord CDN だけ通す.
-// schema.tsで初回validation、avatar.tsでredirectの各hopもこれで再check.
+// schema validation と avatar.ts の redirect 各hop 両方で呼ぶ pyon
 
 const DEFAULT_HOSTS = "cdn.discordapp.com,media.discordapp.net";
 

@@ -69,7 +69,6 @@ async function fetchFollow(initialUrl: string, ctrl: AbortController): Promise<R
   throw new Error("too many redirects");
 }
 
-// streamingで読みながら MAX_BYTES 超えた瞬間bail. content-length詐欺対策 pyon
 async function readWithCap(res: Response): Promise<Buffer> {
   if (!res.body) throw new Error("empty response body");
   const reader = res.body.getReader();

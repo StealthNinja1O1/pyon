@@ -1,7 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 
-// PYON_KEY 設定したらheader `x-pyon-key` を要求する. 未設定だと素通し (dev用 pyon)
-// timing-safe比較してるのは習慣pyon. 短いshared secretだから現実的にはほぼ意味ないけど
+// 未設定だと素通し (dev用) pyon. timing-safe比較は習慣で残してる、短い shared secret には実用上ほぼ意味ない
 const KEY = process.env.PYON_KEY;
 const KEY_BUF = KEY && KEY.length > 0 ? Buffer.from(KEY) : null;
 

@@ -16,45 +16,38 @@ const TRUST_PROXY = process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY =
 const server = Bun.serve({
   port: PORT,
   async fetch(req, server) {
+    const requestId = crypto.randomUUID();
     const url = new URL(req.url);
 
     if (url.pathname === "/health") {
-      return new Response("ok pyon\n", { headers: { "content-type": "text/plain" } });
+      return new Response("ok pyon\n", {
+        headers: { "content-type": "text/plain", "x-pyon-request-id": requestId },
+      });
     }
 
     if (url.pathname === "/quote" && req.method === "POST") {
       const ip = clientIp(req, server);
 
-      // 順番大事 pyon: cheap check から並べる
-      // rate limit → auth → size → parse → validate → render
-
-      if (!rateLimitOk(ip)) {
-        return jsonError(429, "slow down pyon");
-      }
-
-      if (!authOk(req)) {
-        return jsonError(401, "unauthorized");
-      }
+      // cheap check 順 pyon. rate limit が auth より先なのは key bruteforce 抑止
+      if (!rateLimitOk(ip)) return jsonError(429, "slow down pyon", requestId);
+      if (!authOk(req)) return jsonError(401, "unauthorized", requestId);
 
       const lenHeader = req.headers.get("content-length");
       const len = lenHeader ? Number(lenHeader) : 0;
-      if (len > MAX_BODY) {
-        return jsonError(413, "payload too large");
-      }
+      if (len > MAX_BODY) return jsonError(413, "payload too large", requestId);
 
       let body: unknown;
       try {
         body = await req.json();
       } catch {
-        return jsonError(400, "invalid json");
+        return jsonError(400, "invalid json", requestId);
       }
 
       const parsed = QuoteRequest.safeParse(body);
       if (!parsed.success) {
-        return Response.json(
-          { error: "validation failed", issues: parsed.error.issues },
-          { status: 400 },
-        );
+        // zod の issues は schema形状を漏らすので server log only pyon
+        console.warn(`[pyon] ${requestId} validation failed`, parsed.error.issues);
+        return jsonError(400, "validation failed", requestId);
       }
 
       try {
@@ -63,29 +56,32 @@ const server = Bun.serve({
         return new Response(png, {
           headers: {
             "content-type": "image/png",
-            // debugの時にどっちのlayoutで描かれたか分かるように pyon
+            // debug用 pyon: どっちのlayoutで描かれたか
             "x-pyon-style": style,
+            "x-pyon-request-id": requestId,
             "cache-control": "no-store",
           },
         });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "unknown error";
-        console.error("[pyon] render failed orz:", msg);
-        return jsonError(500, msg);
+        // err.message は SSRF target や internal port状態を oracle 化するので外に出さない pyon
+        console.error(`[pyon] ${requestId} render failed orz`, err);
+        return jsonError(500, "render failed", requestId);
       }
     }
 
-    return jsonError(404, "not found");
+    return jsonError(404, "not found", requestId);
   },
 });
 
 console.log(`pyon up at http://localhost:${server.port} pyon〜`);
 
-function jsonError(status: number, message: string) {
-  return Response.json({ error: message }, { status });
+function jsonError(status: number, message: string, requestId: string) {
+  return Response.json(
+    { error: message, requestId },
+    { status, headers: { "x-pyon-request-id": requestId } },
+  );
 }
 
-// proxy越しなら x-forwarded-for の先頭がclient. 直公開だとspoofできるのでTRUST_PROXY=falseで無視
 function clientIp(req: Request, server: Server<unknown>): string {
   if (TRUST_PROXY) {
     const xff = req.headers.get("x-forwarded-for");
