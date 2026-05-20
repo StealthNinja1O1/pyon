@@ -37,19 +37,23 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        padding: "36px 80px 64px 24px",
+        position: "relative",
+        padding: "40px 80px 64px 40px",
       }}
     >
       {/* でっかい " pyon. 切らずに全部見せるのが正解 (cropはbuggyに見える) */}
       <div
         style={{
+          position: "absolute",
+          top: 36,
+          left: 40,
           display: "flex",
           fontFamily: "Fraunces",
           fontWeight: 300,
           fontSize: 180,
           lineHeight: 1,
           color: accent,
-          marginBottom: -24,
+          opacity: 0.92,
         }}
       >
         {"“"}
@@ -60,6 +64,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
           flex: 1,
           display: "flex",
           alignItems: "center",
+          paddingTop: 22,
           fontFamily: "Fraunces",
           fontWeight: 400,
           fontSize: 44,
