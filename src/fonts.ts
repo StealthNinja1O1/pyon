@@ -44,12 +44,15 @@ async function loadFonts(): Promise<FontSpec[]> {
   const [
     interRegular,
     interSemibold,
+    interBlack,
     frauncesLight,
     frauncesRegular,
     newsreaderRegular,
   ] = await Promise.all([
     load("inter", "inter-latin-400-normal.woff"),
     load("inter", "inter-latin-600-normal.woff"),
+    // 900 はimmersionのbilling nameで使う pyon. ドカン
+    load("inter", "inter-latin-900-normal.woff"),
     load("fraunces", "fraunces-latin-300-normal.woff"),
     load("fraunces", "fraunces-latin-400-normal.woff"),
     load("newsreader", "newsreader-latin-400-normal.woff"),
@@ -58,6 +61,7 @@ async function loadFonts(): Promise<FontSpec[]> {
   return [
     { name: "Inter", data: interRegular, weight: 400, style: "normal" },
     { name: "Inter", data: interSemibold, weight: 600, style: "normal" },
+    { name: "Inter", data: interBlack, weight: 900, style: "normal" },
     { name: "Fraunces", data: frauncesLight, weight: 300, style: "normal" },
     { name: "Fraunces", data: frauncesRegular, weight: 400, style: "normal" },
     { name: "Newsreader", data: newsreaderRegular, weight: 400, style: "normal" },

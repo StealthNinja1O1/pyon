@@ -27,7 +27,8 @@ export const QuoteRequest = z.object({
   bgColor: hexColor.optional(),
   textColor: hexColor.optional(),
   // 指定なかったらpyonがrandomで選ぶ pyon. 任せろ
-  style: z.enum(["cinematic", "editorial"]).optional(),
+  // immersionはportraitだから明示requestのみ. randomには混ぜない (botがaspect ratio想定して呼ぶので)
+  style: z.enum(["cinematic", "editorial", "immersion"]).optional(),
 });
 
 export type QuoteRequest = z.infer<typeof QuoteRequest>;

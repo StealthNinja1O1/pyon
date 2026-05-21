@@ -4,8 +4,6 @@ import { getFonts } from "./fonts";
 import { layouts, pickLayout, type LayoutName } from "./layouts";
 import type { QuoteRequest } from "./schema";
 
-const W = 1200;
-const H = 630;
 const DEFAULT_ACCENT = "#ff5fa2"; // brand pink pyon
 const DEFAULT_BG = "#0e0e14";
 const DEFAULT_INK = "#f4f4f6";
@@ -21,7 +19,8 @@ export async function renderQuote(
 ): Promise<RenderResult> {
   const fonts = await getFonts();
   const style = pickLayout(req.style);
-  const tree = layouts[style]({
+  const layout = layouts[style];
+  const tree = layout.render({
     text: req.text,
     displayName: req.displayName,
     username: req.username,
@@ -32,8 +31,8 @@ export async function renderQuote(
   });
 
   const svg = await satori(tree, {
-    width: W,
-    height: H,
+    width: layout.size.width,
+    height: layout.size.height,
     fonts: fonts.map((f) => ({
       name: f.name,
       data: f.data,
@@ -42,8 +41,8 @@ export async function renderQuote(
     })),
   });
 
-  // fitTo width = canvas widthなのでresvgはscaleしない pyon. きっちり1200x630で出る. 神.
-  const buf = new Resvg(svg, { fitTo: { mode: "width", value: W } })
+  // fitTo width = canvas widthなのでresvgはscaleしない pyon. layoutが宣言したdimsで出る. 神.
+  const buf = new Resvg(svg, { fitTo: { mode: "width", value: layout.size.width } })
     .render()
     .asPng();
 

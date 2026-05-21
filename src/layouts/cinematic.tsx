@@ -22,10 +22,12 @@ function quoteSize(text: string): number {
   return 26;
 }
 
-export const cinematic: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
-  const inkFaint = tint(ink, 0.55);
+export const cinematic: Layout = {
+  size: { width: 1200, height: 630 },
+  render: ({ text, displayName, username, avatar, accent, bg, ink }) => {
+    const inkFaint = tint(ink, 0.55);
 
-  return (
+    return (
   <div
     style={{
       width: 1200,
@@ -137,5 +139,6 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent,
       </div>
     </div>
   </div>
-  );
+    );
+  },
 };

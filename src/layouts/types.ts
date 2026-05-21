@@ -12,4 +12,10 @@ export type LayoutInput = {
   ink: string;
 };
 
-export type Layout = (input: LayoutInput) => ReactElement;
+// 各layoutが自分のcanvas dim持つ pyon. landscape/portraitはlayout側の判断.
+export type LayoutSize = { width: number; height: number };
+
+export type Layout = {
+  size: LayoutSize;
+  render: (input: LayoutInput) => ReactElement;
+};

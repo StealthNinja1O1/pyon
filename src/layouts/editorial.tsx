@@ -22,11 +22,13 @@ function quoteSize(text: string): number {
   return 28;
 }
 
-export const editorial: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
-  const accentSoft = tint(accent, 0.12);
-  const inkFaint = tint(ink, 0.55);
+export const editorial: Layout = {
+  size: { width: 1200, height: 630 },
+  render: ({ text, displayName, username, avatar, accent, bg, ink }) => {
+    const accentSoft = tint(accent, 0.12);
+    const inkFaint = tint(ink, 0.55);
 
-  return (
+    return (
     <div
       style={{
         width: 1200,
@@ -178,5 +180,6 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent,
         </div>
       </div>
     </div>
-  );
+    );
+  },
 };
