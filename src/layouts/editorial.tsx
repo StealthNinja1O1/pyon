@@ -10,6 +10,18 @@ function tint(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+// column ~650px. editorialは広いぶん気持ち大きめ pyon
+// スペースなし → 1.5倍換算 (cinematic同様)
+function quoteSize(text: string): number {
+  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
+  if (len <= 60)  return 68;
+  if (len <= 120) return 56;
+  if (len <= 200) return 46;
+  if (len <= 300) return 38;
+  if (len <= 400) return 30;
+  return 28;
+}
+
 export const editorial: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
   const accentSoft = tint(accent, 0.12);
   const inkFaint = tint(ink, 0.55);
@@ -82,8 +94,9 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent,
             maxWidth: 650,
             fontFamily: "Newsreader",
             fontWeight: 400,
-            fontSize: 58,
+            fontSize: quoteSize(text),
             lineHeight: 1.1,
+            wordBreak: "break-word",
             color: ink,
           }}
         >

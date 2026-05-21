@@ -9,6 +9,19 @@ function tint(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+// column ~540px. 感覚値だから見た目おかしかったら普通に直して pyon
+// AAAAAの人対策. スペースなしは横幅食いすぎるので1.5倍換算でtier下げる pyon
+function quoteSize(text: string): number {
+  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
+  if (len <= 60)  return 68;
+  if (len <= 120) return 52;
+  if (len <= 150) return 44;
+  if (len <= 200) return 36;
+  if (len <= 300) return 30;
+  if (len <= 400) return 28;
+  return 26;
+}
+
 export const cinematic: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
   const inkFaint = tint(ink, 0.55);
 
@@ -65,21 +78,24 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent,
         {"“"}
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          paddingTop: 22,
-          fontFamily: "Fraunces",
-          fontWeight: 400,
-          fontSize: 44,
-          lineHeight: 1.18,
-          letterSpacing: "-0.02em",
-          color: ink,
-        }}
-      >
-        {text}
+      {/* satoriはwidth明示しないとtextAlign完全無視する. 30分溶かした pyon */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 22 }}>
+        <div
+          style={{
+            width: 540,
+            fontFamily: "Fraunces",
+            fontWeight: 400,
+            fontSize: quoteSize(text),
+            lineHeight: 1.18,
+            letterSpacing: "-0.02em",
+            // 60字超えると詩になる. 実証済み pyon
+            textAlign: text.length <= 60 ? "center" : "left",
+            wordBreak: "break-word",
+            color: ink,
+          }}
+        >
+          {text}
+        </div>
       </div>
 
       {/* attribution. bar は name の左に置く方が citation っぽく読める pyon */}
