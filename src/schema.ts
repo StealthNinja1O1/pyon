@@ -23,6 +23,9 @@ export const QuoteRequest = z.object({
   // optional pyon. botがcontext見てrole color渡したりtheme color渡したりする想定
   // 省略時はrender.tsでbrand pinkにfallback
   accentColor: hexColor.optional(),
+  // 省略時はdefault dark / light で出る pyon
+  bgColor: hexColor.optional(),
+  textColor: hexColor.optional(),
   // 指定なかったらpyonがrandomで選ぶ pyon. 任せろ
   style: z.enum(["cinematic", "editorial"]).optional(),
 });

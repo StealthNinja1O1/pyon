@@ -8,6 +8,8 @@ export type LayoutInput = {
   avatar: string;
   // hex with `#` prefix, already defaulted by render.ts
   accent: string;
+  bg: string;
+  ink: string;
 };
 
 export type Layout = (input: LayoutInput) => ReactElement;

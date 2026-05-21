@@ -2,17 +2,23 @@ import type { Layout } from "./types";
 
 // 01 cinematic pyon. 一番ドラマチックなやつ. 解釈一致.
 
-const SURFACE = "#0e0e14";
-const INK = "#f4f4f6";
-const INK_FAINT = "#6e6e7a";
+function tint(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
-export const cinematic: Layout = ({ text, displayName, username, avatar, accent }) => (
+export const cinematic: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
+  const inkFaint = tint(ink, 0.55);
+
+  return (
   <div
     style={{
       width: 1200,
       height: 630,
       display: "flex",
-      backgroundColor: SURFACE,
+      backgroundColor: bg,
     }}
   >
     {/* avatar bleed pyon */}
@@ -26,7 +32,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
           width: 540,
           height: 630,
           // このfadeがこのlayoutの全て pyon. stops いじったら詰むので触らないで〜
-          backgroundImage: `linear-gradient(90deg, rgba(14,14,20,0) 0%, rgba(14,14,20,0) 35%, rgba(14,14,20,0.85) 80%, ${SURFACE} 100%)`,
+          backgroundImage: `linear-gradient(90deg, ${tint(bg, 0)} 0%, ${tint(bg, 0)} 35%, ${tint(bg, 0.85)} 80%, ${bg} 100%)`,
         }}
       />
     </div>
@@ -41,7 +47,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
         padding: "40px 80px 64px 40px",
       }}
     >
-      {/* でっかい " pyon. 切らずに全部見せるのが正解 (cropはbuggyに見える) */}
+      {/* でっかい “ pyon. 切らずに全部見せるのが正解 (cropはbuggyに見える) */}
       <div
         style={{
           position: "absolute",
@@ -70,7 +76,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
           fontSize: 44,
           lineHeight: 1.18,
           letterSpacing: "-0.02em",
-          color: INK,
+          color: ink,
         }}
       >
         {text}
@@ -93,7 +99,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
               fontFamily: "Inter",
               fontWeight: 600,
               fontSize: 20,
-              color: INK,
+              color: ink,
               letterSpacing: "-0.01em",
             }}
           >
@@ -105,7 +111,7 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
             fontFamily: "Inter",
             fontWeight: 400,
             fontSize: 16,
-            color: INK_FAINT,
+            color: inkFaint,
             marginTop: 2,
             paddingLeft: 42,
           }}
@@ -115,4 +121,5 @@ export const cinematic: Layout = ({ text, displayName, username, avatar, accent 
       </div>
     </div>
   </div>
-);
+  );
+};

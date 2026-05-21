@@ -7,6 +7,8 @@ import type { QuoteRequest } from "./schema";
 const W = 1200;
 const H = 630;
 const DEFAULT_ACCENT = "#ff5fa2"; // brand pink pyon
+const DEFAULT_BG = "#0e0e14";
+const DEFAULT_INK = "#f4f4f6";
 
 export type RenderResult = {
   png: Blob;
@@ -25,6 +27,8 @@ export async function renderQuote(
     username: req.username,
     avatar,
     accent: req.accentColor ?? DEFAULT_ACCENT,
+    bg: req.bgColor ?? DEFAULT_BG,
+    ink: req.textColor ?? DEFAULT_INK,
   });
 
   const svg = await satori(tree, {

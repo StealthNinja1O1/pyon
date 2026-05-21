@@ -2,11 +2,6 @@ import type { Layout } from "./types";
 
 // 02 editorial pyon. magazine margin-note路線. これなら硬いedgeが暴れない.
 
-const SURFACE = "#0e0e14";
-const SURFACE_EDGE = "#111119";
-const INK = "#f4f4f6";
-const INK_FAINT = "#6e6e7a";
-
 // hex -> rgbaのhelper pyon. layoutにrgba直書きするとnoise多すぎたのでまとめた
 function tint(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -15,8 +10,9 @@ function tint(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-export const editorial: Layout = ({ text, displayName, username, avatar, accent }) => {
+export const editorial: Layout = ({ text, displayName, username, avatar, accent, bg, ink }) => {
   const accentSoft = tint(accent, 0.12);
+  const inkFaint = tint(ink, 0.55);
 
   return (
     <div
@@ -25,8 +21,8 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent 
         height: 630,
         display: "flex",
         position: "relative",
-        backgroundColor: SURFACE,
-        backgroundImage: `linear-gradient(90deg, ${SURFACE} 0%, ${SURFACE} 64%, ${SURFACE_EDGE} 100%)`,
+        backgroundColor: bg,
+        backgroundImage: `linear-gradient(90deg, ${bg} 0%, ${bg} 64%, ${tint(bg, 0.85)} 100%)`,
       }}
     >
       {/* quiet little spine. just a hint pyon */}
@@ -88,10 +84,10 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent 
             fontWeight: 400,
             fontSize: 58,
             lineHeight: 1.1,
-            color: INK,
+            color: ink,
           }}
         >
-          {"“" + text + "”"}
+          {`“${text}”`}
         </div>
 
         {/* citation-style pyon: barはnameの左 */}
@@ -112,7 +108,7 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent 
                 fontFamily: "Inter",
                 fontWeight: 700,
                 fontSize: 20,
-                color: INK,
+                color: ink,
               }}
             >
               {displayName}
@@ -122,7 +118,7 @@ export const editorial: Layout = ({ text, displayName, username, avatar, accent 
                 fontFamily: "Inter",
                 fontWeight: 400,
                 fontSize: 15,
-                color: INK_FAINT,
+                color: inkFaint,
                 marginTop: 3,
               }}
             >
