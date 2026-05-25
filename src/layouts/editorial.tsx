@@ -91,7 +91,7 @@ export const editorial: Layout = {
           </div>
         </div>
 
-        {richTextContainer(`"${text}"`, {
+        {richTextContainer(`“${text}”`, {
           display: "flex",
           maxWidth: 650,
           fontFamily: "Newsreader",

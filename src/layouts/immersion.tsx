@@ -95,7 +95,7 @@ export const immersion: Layout = {
           }}
         >
           {/* mark色を分ける case が satori で詰む現象あり pyon. monochromeで安牌 */}
-          {richTextContainer(`"${text}"`, {
+          {richTextContainer(`“${text}”`, {
               width: 860,
               fontFamily: "Fraunces",
               fontWeight: 400,

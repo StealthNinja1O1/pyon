@@ -9,7 +9,63 @@ const DEFAULT_BG = "#0e0e14";
 const DEFAULT_INK = "#f4f4f6";
 
 const TWEMOJI_CDN = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
+const TWEMOJI_TIMEOUT_MS = 5_000;
+const TWEMOJI_MAX_BYTES = 256 * 1024; // svgがこれより重い世界線はない. defensive pyon
+const TWEMOJI_CACHE_MAX = 512;        // unicode絵文字3000あっても多分hot setはこれで足りる pyon
 const twemojiCache = new Map<string, string>();
+
+// insertion-order eviction. LRUと言うほどでもないけど bounded pyon
+function cacheTwemoji(key: string, val: string) {
+  if (twemojiCache.size >= TWEMOJI_CACHE_MAX) {
+    const oldest = twemojiCache.keys().next().value;
+    if (oldest !== undefined) twemojiCache.delete(oldest);
+  }
+  twemojiCache.set(key, val);
+}
+
+async function fetchTwemoji(cp: string): Promise<string> {
+  const cached = twemojiCache.get(cp);
+  if (cached) return cached;
+
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), TWEMOJI_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${TWEMOJI_CDN}/${cp}.svg`, { signal: ctrl.signal });
+    if (!res.ok) return "";
+
+    // jsdelivrたまにHTMLでerror返してくる. SVGだけ受け入れる pyon
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("svg") && !ct.includes("xml")) return "";
+
+    const declared = Number(res.headers.get("content-length") ?? 0);
+    if (Number.isFinite(declared) && declared > TWEMOJI_MAX_BYTES) return "";
+
+    // streaming読み. content-length嘘つきserver対策 pyon
+    const reader = res.body?.getReader();
+    if (!reader) return "";
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > TWEMOJI_MAX_BYTES) {
+        await reader.cancel().catch(() => {});
+        return "";
+      }
+      chunks.push(value);
+    }
+
+    const svg = Buffer.concat(chunks).toString("utf-8");
+    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    cacheTwemoji(cp, dataUrl);
+    return dataUrl;
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(t);
+  }
+}
 
 export type RenderResult = {
   png: Blob;
@@ -45,18 +101,7 @@ export async function renderQuote(
     loadAdditionalAsset: async (code: string, segment: string) => {
       if (code !== "emoji") return "";
       const cp = [...segment].map((c) => c.codePointAt(0)!.toString(16)).join("-");
-      const cached = twemojiCache.get(cp);
-      if (cached) return cached;
-      try {
-        const res = await fetch(`${TWEMOJI_CDN}/${cp}.svg`);
-        if (res.ok) {
-          const svg = await res.text();
-          const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-          twemojiCache.set(cp, dataUrl);
-          return dataUrl;
-        }
-      } catch {}
-      return "";
+      return fetchTwemoji(cp);
     },
   });
 
