@@ -1,4 +1,5 @@
 import type { Layout } from "./types";
+import { richTextContainer } from "./rich-text";
 
 // 02 editorial pyon. magazine margin-note路線. これなら硬いedgeが暴れない.
 
@@ -90,20 +91,16 @@ export const editorial: Layout = {
           </div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            maxWidth: 650,
-            fontFamily: "Newsreader",
-            fontWeight: 400,
-            fontSize: quoteSize(text),
-            lineHeight: 1.1,
-            wordBreak: "break-word",
-            color: ink,
-          }}
-        >
-          {`“${text}”`}
-        </div>
+        {richTextContainer(`"${text}"`, {
+          display: "flex",
+          maxWidth: 650,
+          fontFamily: "Newsreader",
+          fontWeight: 400,
+          fontSize: quoteSize(text),
+          lineHeight: 1.1,
+          wordBreak: "break-word",
+          color: ink,
+        }, quoteSize(text))}
 
         {/* citation-style pyon: barはnameの左 */}
         <div style={{ display: "flex", alignItems: "flex-start" }}>

@@ -1,4 +1,5 @@
 import type { Layout } from "./types";
+import { richTextContainer } from "./rich-text";
 
 // 03 immersion pyon. portrait 2:3. avatarは上2/3、quoteはavatarがbgに
 // 溶けるtwilightに乗せる. 下のnameはbilling-styleでドカン pyon.
@@ -94,8 +95,7 @@ export const immersion: Layout = {
           }}
         >
           {/* mark色を分ける case が satori で詰む現象あり pyon. monochromeで安牌 */}
-          <div
-            style={{
+          {richTextContainer(`"${text}"`, {
               width: 860,
               fontFamily: "Fraunces",
               fontWeight: 400,
@@ -105,10 +105,7 @@ export const immersion: Layout = {
               textAlign: "center",
               color: ink,
               wordBreak: "break-word",
-            }}
-          >
-            {`“${text}”`}
-          </div>
+            }, quoteSize(text))}
         </div>
 
         {/* footer pyon. accent rule → でかいbilling name → handle */}

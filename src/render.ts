@@ -8,6 +8,9 @@ const DEFAULT_ACCENT = "#ff5fa2"; // brand pink pyon
 const DEFAULT_BG = "#0e0e14";
 const DEFAULT_INK = "#f4f4f6";
 
+const TWEMOJI_CDN = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
+const twemojiCache = new Map<string, string>();
+
 export type RenderResult = {
   png: Blob;
   style: LayoutName;
@@ -39,6 +42,22 @@ export async function renderQuote(
       weight: f.weight,
       style: f.style,
     })),
+    loadAdditionalAsset: async (code: string, segment: string) => {
+      if (code !== "emoji") return "";
+      const cp = [...segment].map((c) => c.codePointAt(0)!.toString(16)).join("-");
+      const cached = twemojiCache.get(cp);
+      if (cached) return cached;
+      try {
+        const res = await fetch(`${TWEMOJI_CDN}/${cp}.svg`);
+        if (res.ok) {
+          const svg = await res.text();
+          const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+          twemojiCache.set(cp, dataUrl);
+          return dataUrl;
+        }
+      } catch {}
+      return "";
+    },
   });
 
   // fitTo width = canvas widthなのでresvgはscaleしない pyon. layoutが宣言したdimsで出る. 神.

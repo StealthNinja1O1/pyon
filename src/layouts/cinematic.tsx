@@ -1,4 +1,5 @@
 import type { Layout } from "./types";
+import { richTextContainer } from "./rich-text";
 
 // 01 cinematic pyon. 一番ドラマチックなやつ. 解釈一致.
 
@@ -82,22 +83,18 @@ export const cinematic: Layout = {
 
       {/* satoriはwidth明示しないとtextAlign完全無視する. 30分溶かした pyon */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 22 }}>
-        <div
-          style={{
-            width: 540,
-            fontFamily: "Fraunces",
-            fontWeight: 400,
-            fontSize: quoteSize(text),
-            lineHeight: 1.18,
-            letterSpacing: "-0.02em",
-            // 60字超えると詩になる. 実証済み pyon
-            textAlign: text.length <= 60 ? "center" : "left",
-            wordBreak: "break-word",
-            color: ink,
-          }}
-        >
-          {text}
-        </div>
+        {richTextContainer(text, {
+          width: 540,
+          fontFamily: "Fraunces",
+          fontWeight: 400,
+          fontSize: quoteSize(text),
+          lineHeight: 1.18,
+          letterSpacing: "-0.02em",
+          // 60字超えると詩になる. 実証済み pyon
+          textAlign: text.length <= 60 ? "center" : "left",
+          wordBreak: "break-word",
+          color: ink,
+        }, quoteSize(text))}
       </div>
 
       {/* attribution. bar は name の左に置く方が citation っぽく読める pyon */}
