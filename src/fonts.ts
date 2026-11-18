@@ -11,6 +11,7 @@ export type FontSpec = {
   data: ArrayBuffer;
   weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
   style: "normal" | "italic";
+  lang?: string;
 };
 
 // promise自体をcacheする pyon. result じゃない理由:
@@ -66,4 +67,65 @@ async function loadFonts(): Promise<FontSpec[]> {
     { name: "Fraunces", data: frauncesRegular, weight: 400, style: "normal" },
     { name: "Newsreader", data: newsreaderRegular, weight: 400, style: "normal" },
   ];
+}
+
+type Face = { name: string; family: string; file: string; lang?: string };
+
+// ※ japanese subset は JIS第1/第2水準くらい. 髙﨑みたいな異体字は豆腐 pyon.
+// 足りなくなったら numbered slice を unicode-range で引く方式に昇格
+const NOTO_JP: Face = {
+  name: "Noto Serif JP",
+  family: "noto-serif-jp",
+  file: "noto-serif-jp-japanese-400-normal.woff",
+  lang: "ja-JP",
+};
+const NOTO_SC: Face = {
+  name: "Noto Serif SC",
+  family: "noto-serif-sc",
+  file: "noto-serif-sc-chinese-simplified-400-normal.woff",
+  lang: "zh-CN",
+};
+const NOTO_THAI: Face = {
+  name: "Noto Serif Thai",
+  family: "noto-serif-thai",
+  file: "noto-serif-thai-thai-400-normal.woff",
+  lang: "th-TH",
+};
+
+// satoriのfallbackは name ごとに1面しか見ない. 同名で足すと後から来た方が消えるので全部別名 pyon
+const LATIN_EXT: Face[] = [
+  { name: "Fraunces Ext", family: "fraunces", file: "fraunces-latin-ext-400-normal.woff" },
+  { name: "Fraunces Viet", family: "fraunces", file: "fraunces-vietnamese-400-normal.woff" },
+  { name: "Noto Serif Cyrl", family: "noto-serif-jp", file: "noto-serif-jp-cyrillic-400-normal.woff" },
+];
+
+// 漢字は "ja-JP|zh-CN|zh-TW|zh-HK" でまとめて聞かれる. JPが先に入るので字形は日本、SCは簡体字の穴埋め pyon
+const FACES_BY_LOCALE: Record<string, Face[]> = {
+  "ja-JP": [NOTO_JP],
+  "zh-CN": [NOTO_JP, NOTO_SC],
+  "zh-TW": [NOTO_JP, NOTO_SC],
+  "zh-HK": [NOTO_JP, NOTO_SC],
+  "th-TH": [NOTO_THAI],
+  unknown: LATIN_EXT,
+};
+
+// 同じArrayBufferを返し続けるのが大事. satoriはbufferのidentityでparse結果をcacheしてる pyon
+const faceCache = new Map<string, Promise<FontSpec>>();
+
+function loadFace(face: Face): Promise<FontSpec> {
+  const hit = faceCache.get(face.file);
+  if (hit) return hit;
+  const p = load(face.family, face.file).then(
+    (data): FontSpec => ({ name: face.name, data, weight: 400, style: "normal", lang: face.lang }),
+  );
+  faceCache.set(face.file, p);
+  p.catch(() => {
+    if (faceCache.get(face.file) === p) faceCache.delete(face.file);
+  });
+  return p;
+}
+
+export function getScriptFonts(code: string): Promise<FontSpec[]> {
+  const faces = new Set(code.split("|").flatMap((locale) => FACES_BY_LOCALE[locale] ?? []));
+  return Promise.all([...faces].map(loadFace));
 }

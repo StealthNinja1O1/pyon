@@ -1,6 +1,6 @@
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import { getFonts } from "./fonts";
+import { getFonts, getScriptFonts, type FontSpec } from "./fonts";
 import { layouts, pickLayout, type LayoutName } from "./layouts";
 import type { QuoteRequest } from "./schema";
 
@@ -24,8 +24,8 @@ function cacheTwemoji(key: string, val: string) {
   twemojiCache.set(key, val);
 }
 
-export async function loadEmojiAsset(code: string, segment: string): Promise<string> {
-  if (code !== "emoji") return "";
+export async function loadAdditionalAsset(code: string, segment: string): Promise<string | FontSpec[]> {
+  if (code !== "emoji") return getScriptFonts(code);
   const cp = [...segment].map((c) => c.codePointAt(0)!.toString(16)).join("-");
   return fetchTwemoji(cp);
 }
@@ -110,7 +110,7 @@ export async function renderQuote(
       weight: f.weight,
       style: f.style,
     })),
-    loadAdditionalAsset: loadEmojiAsset,
+    loadAdditionalAsset,
   });
 
   // fitTo width = canvas widthなのでresvgはscaleしない pyon. layoutが宣言したdimsで出る. 神.

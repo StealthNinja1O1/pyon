@@ -6,6 +6,10 @@ FROM oven/bun:1-slim AS deps
 WORKDIR /app
 COPY package.json bun.lock* bun.lockb* ./
 RUN bun install --frozen-lockfile --production
+# fontsourceは全weight x woff+woff2 x 125 sliceを船積みしてくる. CJKで読むのは3ファイルだけ、残り~185MBは海へ pyon
+RUN find node_modules/@fontsource -name '*.woff2' -delete && \
+    find node_modules/@fontsource/noto-serif-jp -name '*.woff' ! -name '*-japanese-400-normal.woff' ! -name '*-cyrillic-400-normal.woff' -delete && \
+    find node_modules/@fontsource/noto-serif-sc -name '*.woff' ! -name '*-chinese-simplified-400-normal.woff' -delete
 
 FROM oven/bun:1-slim AS runtime
 WORKDIR /app
