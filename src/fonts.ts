@@ -48,7 +48,11 @@ async function loadFonts(): Promise<FontSpec[]> {
     interBlack,
     frauncesLight,
     frauncesRegular,
+    frauncesSemibold,
+    frauncesItalic,
     newsreaderRegular,
+    newsreaderSemibold,
+    newsreaderItalic,
   ] = await Promise.all([
     load("inter", "inter-latin-400-normal.woff"),
     load("inter", "inter-latin-600-normal.woff"),
@@ -56,7 +60,11 @@ async function loadFonts(): Promise<FontSpec[]> {
     load("inter", "inter-latin-900-normal.woff"),
     load("fraunces", "fraunces-latin-300-normal.woff"),
     load("fraunces", "fraunces-latin-400-normal.woff"),
+    load("fraunces", "fraunces-latin-600-normal.woff"),
+    load("fraunces", "fraunces-latin-400-italic.woff"),
     load("newsreader", "newsreader-latin-400-normal.woff"),
+    load("newsreader", "newsreader-latin-600-normal.woff"),
+    load("newsreader", "newsreader-latin-400-italic.woff"),
   ]);
 
   return [
@@ -65,7 +73,11 @@ async function loadFonts(): Promise<FontSpec[]> {
     { name: "Inter", data: interBlack, weight: 900, style: "normal" },
     { name: "Fraunces", data: frauncesLight, weight: 300, style: "normal" },
     { name: "Fraunces", data: frauncesRegular, weight: 400, style: "normal" },
+    { name: "Fraunces", data: frauncesSemibold, weight: 600, style: "normal" },
+    { name: "Fraunces", data: frauncesItalic, weight: 400, style: "italic" },
     { name: "Newsreader", data: newsreaderRegular, weight: 400, style: "normal" },
+    { name: "Newsreader", data: newsreaderSemibold, weight: 600, style: "normal" },
+    { name: "Newsreader", data: newsreaderItalic, weight: 400, style: "italic" },
   ];
 }
 

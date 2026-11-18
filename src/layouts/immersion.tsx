@@ -1,5 +1,6 @@
 import type { Layout } from "./types";
-import { richTextContainer } from "./rich-text";
+import { markdownContainer } from "./rich-text";
+import { parseMarkdown, visibleLength } from "../markdown";
 
 // 03 immersion pyon. portrait 2:3. avatarは上2/3、quoteはavatarがbgに
 // 溶けるtwilightに乗せる. 下のnameはbilling-styleでドカン pyon.
@@ -13,9 +14,7 @@ function tint(hex: string, alpha: number): string {
 }
 
 // column ~860px (両側 70 padding). username 76pxとせめてparityで戦えるサイズに pyon.
-// スペースなし → 1.5倍換算 (cinematic/editorial 同様)
-function quoteSize(text: string): number {
-  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
+function quoteSize(len: number): number {
   if (len <= 60)  return 80;
   if (len <= 120) return 68;
   if (len <= 200) return 56;
@@ -24,21 +23,12 @@ function quoteSize(text: string): number {
   return 30;
 }
 
-// 行数に応じてtop位置をズラす pyon. 長文ほど上に逃がしてMIYOとの間に空気を残す.
-// tierはquoteSizeと揃えてる. 揃えとかないとフォント変えたとき詰む
-function quoteTop(text: string): number {
-  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
-  if (len <= 60)  return 870;  // 2行ぐらい. 下めキープでmovieポスターっぽさ強調
-  if (len <= 120) return 870;  // 4行ぐらい. まだ余裕ある
-  if (len <= 200) return 770;  // 6行になるのでがっつり上げる
-  if (len <= 300) return 800;  // フォント小さくなるけど行数増えるのでまだ上目
-  if (len <= 400) return 830;
-  return 850;
-}
-
 export const immersion: Layout = {
   size: { width: 1000, height: 1500 },
   render: ({ text, displayName, username, avatar, accent, bg, ink }) => {
+    const ast = parseMarkdown(text);
+    // markup抜きの見た目文字数でtier決め. スペースなしは1.5倍換算 pyon
+    const len = text.includes(" ") ? visibleLength(ast) : Math.round(visibleLength(ast) * 1.5);
     const inkFaint = tint(ink, 0.55);
 
     return (
@@ -82,32 +72,34 @@ export const immersion: Layout = {
           />
         </div>
 
-        {/* quoteはtwilightに乗せる pyon. top は文字数で動かす (quoteTop) */}
+        {/* quoteはtwilightに乗せる pyon. markdownで高さが読めなくなったのでbottom anchor:
+            floorはMIYO billingの頭 (~1270) のちょい上、文章が伸びたら写真側へ育つ */}
         <div
           style={{
             position: "absolute",
-            top: quoteTop(text),
+            top: 0,
             left: 0,
             width: 1000,
+            height: 1240,
             display: "flex",
             justifyContent: "center",
+            alignItems: "flex-end",
             // ※ 横paddingはsatori 0.63がcontent-box解釈して70px右にズレる (0.10はborder-box挙動だった).
             // 860の子がwidth 1000内でself-centerするので横は0でいい pyon
-            padding: "60px 0",
           }}
         >
           {/* mark色を分ける case が satori で詰む現象あり pyon. monochromeで安牌 */}
-          {richTextContainer(`“${text}”`, {
+          {markdownContainer(ast, {
               width: 860,
               fontFamily: "Fraunces",
               fontWeight: 400,
-              fontSize: quoteSize(text),
+              fontSize: quoteSize(len),
               lineHeight: 1.13,
               letterSpacing: "-0.025em",
               textAlign: "center",
               color: ink,
               wordBreak: "break-word",
-            }, quoteSize(text))}
+            }, { size: quoteSize(len), ink, accent, quoted: true })}
         </div>
 
         {/* footer pyon. accent rule → でかいbilling name → handle */}
