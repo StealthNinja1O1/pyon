@@ -59,8 +59,10 @@ export const editorial: Layout = {
       {/* content column */}
       <div
         style={{
-          width: 780,
-          height: 630,
+          // ※ 0.63はcontent-box: 旧 780x630+padding が754px柱になってcitationが画面外に沈んでた.
+          // paddingを足すと780x630になる寸法で宣言する pyon
+          width: 654,
+          height: 506,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -144,8 +146,9 @@ export const editorial: Layout = {
       {/* inset portrait rail */}
       <div
         style={{
-          width: 420,
-          height: 630,
+          // ※ 同じcontent-box対策: padding込みで420x630 pyon
+          width: 376,
+          height: 554,
           display: "flex",
           position: "relative",
           padding: "38px 44px 38px 0",

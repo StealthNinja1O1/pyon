@@ -43,18 +43,16 @@ const TIME_OPTS: Record<Exclude<TimeStyle, "R">, Intl.DateTimeFormatOptions> = {
 // ※ tz/localeはT9のbot契約待ち. それまではUTC+en固定、Rだけはrender時刻基準 pyon
 function formatTime(unix: number, style: TimeStyle): string {
   if (style === "R") {
-    const s = Math.round(Date.now() / 1000 - unix);
-    const past = s >= 0;
+    const s = Math.round(unix - Date.now() / 1000);
     const a = Math.abs(s);
-    const [n, unit] =
-      a < 60 ? [a, "second"] :
-      a < 3600 ? [Math.round(a / 60), "minute"] :
-      a < 86400 ? [Math.round(a / 3600), "hour"] :
-      a < 2592000 ? [Math.round(a / 86400), "day"] :
-      a < 31536000 ? [Math.round(a / 2592000), "month"] :
-      [Math.round(a / 31536000), "year"];
-    const word = n === 1 ? unit : `${unit}s`;
-    return past ? `${n} ${word} ago` : `in ${n} ${word}`;
+    const [n, unit]: [number, Intl.RelativeTimeFormatUnit] =
+      a < 60 ? [s, "second"] :
+      a < 3600 ? [Math.round(s / 60), "minute"] :
+      a < 86400 ? [Math.round(s / 3600), "hour"] :
+      a < 2592000 ? [Math.round(s / 86400), "day"] :
+      a < 31536000 ? [Math.round(s / 2592000), "month"] :
+      [Math.round(s / 31536000), "year"];
+    return new Intl.RelativeTimeFormat("en").format(n, unit);
   }
   return new Intl.DateTimeFormat("en-GB", { ...TIME_OPTS[style], timeZone: "UTC" }).format(unix * 1000);
 }
@@ -171,6 +169,7 @@ function blockEl(b: Block, o: MdOpts, key: number): ReactElement {
           key={key}
           style={{
             display: "block",
+            textAlign: "left",
             backgroundColor: tint(o.ink, 0.08),
             borderRadius: 10,
             padding: `${o.size * 0.3}px ${o.size * 0.5}px`,
@@ -186,7 +185,8 @@ function blockEl(b: Block, o: MdOpts, key: number): ReactElement {
   }
 }
 
-// “ ” は最初/最後のinline-blockに縫い込む. headerの行頭 # を壊さないよう parse後に入れる pyon
+// “ ” は最初/最後のinline-blockに縫い込む. headerの行頭 # を壊さないよう parse後に入れる.
+// 縫い込み先がcodeblock/list/quoteなら黙って付けない (迷子の “ が写真上に浮くよりマシ) pyon
 function withQuoteMarks(ast: Block[]): Block[] {
   const mark = (text: string): Inline => ({ type: "text", text });
   const open = ast[0];
@@ -194,15 +194,11 @@ function withQuoteMarks(ast: Block[]): Block[] {
   const result = [...ast];
   if (open && open.type !== "codeblock" && open.type !== "list" && open.type !== "quote") {
     result[0] = { ...open, children: [mark("“"), ...open.children] } as Block;
-  } else {
-    result.unshift({ type: "paragraph", children: [mark("“")] });
   }
   if (close && close.type !== "codeblock" && close.type !== "list" && close.type !== "quote") {
     const idx = result.length - 1;
     const last = result[idx]! as Extract<Block, { children: Inline[] }>;
     result[idx] = { ...last, children: [...last.children, mark("”")] } as Block;
-  } else {
-    result.push({ type: "paragraph", children: [mark("”")] });
   }
   return result;
 }
