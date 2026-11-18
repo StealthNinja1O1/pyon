@@ -71,6 +71,7 @@ immersion は portrait で aspect ratio 違うので random pool には入って
 | `PYON_AVATAR_ALLOWED_HOSTS` | `cdn.discordapp.com,media.discordapp.net` | comma-separated. avatarURLで許す host. SSRF対策の核 pyon |
 | `PYON_MAX_CONCURRENT` | `4` | 同時 render 上限. 越えたら 503 (queueしない pyon) |
 | `PYON_REQ_TIMEOUT_MS` | `15000` | 1 request の全体 timeout (ms). 越えたら 504 |
+| `PYON_CACHE_MAX` | `32` | 明示 `style` 付き request の in-process cache 件数. `0` で無効. style 省略 (random) は対象外、roulette は凍らせない pyon |
 
 ## abuse limits pyon
 
