@@ -1,5 +1,5 @@
 import satori from "satori";
-import { Resvg } from "@resvg/resvg-js";
+import { Resvg } from "./resvg";
 import { getFonts } from "./fonts";
 import { layouts, pickLayout, type LayoutName } from "./layouts";
 import type { QuoteRequest } from "./schema";
@@ -23,7 +23,16 @@ function cacheTwemoji(key: string, val: string) {
   twemojiCache.set(key, val);
 }
 
-async function fetchTwemoji(cp: string): Promise<string> {
+async function fetchTwemoji(rawCp: string): Promise<string> {
+  // twemojiのfile名rule: fe0f (VS16) はstrip. ただしZWJ (200d) sequenceは
+  // fe0f込みの正式名 (例: 2764-fe0f-200d-1f525). twemoji本体のgrabTheRightIconと同じalgo pyon
+  const cp = rawCp.includes("200d")
+    ? rawCp
+    : rawCp
+        .split("-")
+        .filter((part) => part !== "fe0f")
+        .join("-");
+
   const cached = twemojiCache.get(cp);
   if (cached) return cached;
 

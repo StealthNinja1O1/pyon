@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { isAllowedAvatarUrl } from "./allowlist";
 
-// soft cap pyon. 500文字超えたらlayoutが先に詰む (text wrappingが死ぬ)
-const MAX_TEXT = 500;
+// soft cap pyon. 500 visual chars. raw string may be longer due to <:name:id> markup.
+// layoutのtext wrappingはvisual chars基準で計算するので, markup分は関係ない pyon.
+const MAX_TEXT = 5000;
 const MAX_NAME = 80;
 
 // https + allowlistedなhost のみ. SSRF対策の一段目pyon. 二段目は avatar.ts の redirect手動check

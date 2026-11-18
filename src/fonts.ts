@@ -1,10 +1,18 @@
 // satoriには (family, weight, style) + raw bytes のtripleを渡す pyon
 // stylesで指定する fontFamily にこれをmatchしにいく仕組み
 //
-// font sourceは fontsource (npm). bun install で勝手に揃う pyon
-// 静的 .woff per weight なのでsatoriの parser が幸せ. variable font事件は二度と起こさない.
+// font sourceは fontsource (npm). `import ... with { type: "file" }` で
+// bun build --compile 時に実行ファイルに埋め込まれる pyon.
+// dev中は通常のファイルパスとして解決される. 静的 .woff per weight なので
+// satoriの parser が幸せ. variable font事件は二度と起こさない.
 
-const FONTSOURCE = "node_modules/@fontsource";
+import interRegularPath from "@fontsource/inter/files/inter-latin-400-normal.woff" with { type: "file" };
+import interSemiboldPath from "@fontsource/inter/files/inter-latin-600-normal.woff" with { type: "file" };
+// 900 はimmersionのbilling nameで使う pyon. ドカン
+import interBlackPath from "@fontsource/inter/files/inter-latin-900-normal.woff" with { type: "file" };
+import frauncesLightPath from "@fontsource/fraunces/files/fraunces-latin-300-normal.woff" with { type: "file" };
+import frauncesRegularPath from "@fontsource/fraunces/files/fraunces-latin-400-normal.woff" with { type: "file" };
+import newsreaderRegularPath from "@fontsource/newsreader/files/newsreader-latin-400-normal.woff" with { type: "file" };
 
 export type FontSpec = {
   name: string;
@@ -16,17 +24,6 @@ export type FontSpec = {
 // promise自体をcacheする pyon. result じゃない理由:
 // concurrent な初回呼び出しでもPromise.all 一回しか走らない (thundering herd 回避)
 let cachePromise: Promise<FontSpec[]> | null = null;
-
-async function load(family: string, file: string): Promise<ArrayBuffer> {
-  const path = `${FONTSOURCE}/${family}/files/${file}`;
-  const f = Bun.file(path);
-  if (!(await f.exists())) {
-    throw new Error(
-      `font missing pyon: ${path}\n\`bun install\` を走らせ直して pyon〜`,
-    );
-  }
-  return await f.arrayBuffer();
-}
 
 export function getFonts(): Promise<FontSpec[]> {
   if (!cachePromise) {
@@ -49,13 +46,12 @@ async function loadFonts(): Promise<FontSpec[]> {
     frauncesRegular,
     newsreaderRegular,
   ] = await Promise.all([
-    load("inter", "inter-latin-400-normal.woff"),
-    load("inter", "inter-latin-600-normal.woff"),
-    // 900 はimmersionのbilling nameで使う pyon. ドカン
-    load("inter", "inter-latin-900-normal.woff"),
-    load("fraunces", "fraunces-latin-300-normal.woff"),
-    load("fraunces", "fraunces-latin-400-normal.woff"),
-    load("newsreader", "newsreader-latin-400-normal.woff"),
+    Bun.file(interRegularPath).arrayBuffer(),
+    Bun.file(interSemiboldPath).arrayBuffer(),
+    Bun.file(interBlackPath).arrayBuffer(),
+    Bun.file(frauncesLightPath).arrayBuffer(),
+    Bun.file(frauncesRegularPath).arrayBuffer(),
+    Bun.file(newsreaderRegularPath).arrayBuffer(),
   ]);
 
   return [
