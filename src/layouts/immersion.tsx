@@ -91,7 +91,9 @@ export const immersion: Layout = {
             width: 1000,
             display: "flex",
             justifyContent: "center",
-            padding: "60px 70px",
+            // ※ 横paddingはsatori 0.63がcontent-box解釈して70px右にズレる (0.10はborder-box挙動だった).
+            // 860の子がwidth 1000内でself-centerするので横は0でいい pyon
+            padding: "60px 0",
           }}
         >
           {/* mark色を分ける case が satori で詰む現象あり pyon. monochromeで安牌 */}

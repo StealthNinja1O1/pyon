@@ -37,13 +37,15 @@ export function renderRichText(text: string, emojiSize: number): string | ReactE
 export function richTextContainer(text: string, style: CSSProperties, emojiSize: number): ReactElement {
   const content = renderRichText(text, emojiSize);
 
-  if (typeof content === "string") return <div style={style}>{content}</div>;
+  // pre-wrap必須: defaultのnormalだと\nが全部スペースに潰れて複数行messageが一段落化する pyon
+  if (typeof content === "string") return <div style={{ whiteSpace: "pre-wrap", ...style }}>{content}</div>;
   // textAlign は span の wrap 挙動に効くので残す pyon. justifyContent は flex 子要素の整列担当.
   const justifyContent = style.textAlign === "center" ? "center" : style.textAlign === "right" ? "flex-end" : "flex-start";
 
   return (
     <div
       style={{
+        whiteSpace: "pre-wrap",
         ...style,
         display: "flex",
         flexWrap: "wrap",

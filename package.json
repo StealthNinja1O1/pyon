@@ -15,7 +15,7 @@
     "@fontsource/newsreader": "^5.2.10",
     "@resvg/resvg-js": "^2.6.2",
     "react": "^19.2.6",
-    "satori": "^0.10.13",
+    "satori": "0.63.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
