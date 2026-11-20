@@ -1,6 +1,6 @@
 import satori from "satori";
 import { Resvg } from "./resvg";
-import { getFonts } from "./fonts";
+import { getFonts, getScriptFonts, type FontSpec } from "./fonts";
 import { layouts, pickLayout, type LayoutName } from "./layouts";
 import type { QuoteRequest } from "./schema";
 
@@ -8,7 +8,8 @@ const DEFAULT_ACCENT = "#ff5fa2"; // brand pink pyon
 const DEFAULT_BG = "#0e0e14";
 const DEFAULT_INK = "#f4f4f6";
 
-const TWEMOJI_CDN = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
+// jdecked fork = discord本人が使ってるやつ. twitter/twemoji@14は2021で凍結、U15+が全部404 pyon
+const TWEMOJI_CDN = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v17.0.3/assets/svg";
 const TWEMOJI_TIMEOUT_MS = 5_000;
 const TWEMOJI_MAX_BYTES = 256 * 1024; // svgがこれより重い世界線はない. defensive pyon
 const TWEMOJI_CACHE_MAX = 512;        // unicode絵文字3000あっても多分hot setはこれで足りる pyon
@@ -23,16 +24,18 @@ function cacheTwemoji(key: string, val: string) {
   twemojiCache.set(key, val);
 }
 
+export async function loadAdditionalAsset(code: string, segment: string): Promise<string | FontSpec[]> {
+  if (code !== "emoji") return getScriptFonts(code);
+  const cp = [...segment].map((c) => c.codePointAt(0)!.toString(16)).join("-");
+  return fetchTwemoji(cp);
+}
+
 async function fetchTwemoji(rawCp: string): Promise<string> {
-  // twemojiのfile名rule: fe0f (VS16) はstrip. ただしZWJ (200d) sequenceは
-  // fe0f込みの正式名 (例: 2764-fe0f-200d-1f525). twemoji本体のgrabTheRightIconと同じalgo pyon
+  // twemojiのファイル名、ZWJ無しのsequenceはfe0f落とす (2764-fe0f.svgは404、2764.svgが正).
+  // upstreamのgrabTheRightIconと同じ理屈. Steakedの出前パッチ pyon
   const cp = rawCp.includes("200d")
     ? rawCp
-    : rawCp
-        .split("-")
-        .filter((part) => part !== "fe0f")
-        .join("-");
-
+    : rawCp.split("-").filter((part) => part !== "fe0f").join("-");
   const cached = twemojiCache.get(cp);
   if (cached) return cached;
 
@@ -107,11 +110,7 @@ export async function renderQuote(
       weight: f.weight,
       style: f.style,
     })),
-    loadAdditionalAsset: async (code: string, segment: string) => {
-      if (code !== "emoji") return "";
-      const cp = [...segment].map((c) => c.codePointAt(0)!.toString(16)).join("-");
-      return fetchTwemoji(cp);
-    },
+    loadAdditionalAsset,
   });
 
   // fitTo width = canvas widthなのでresvgはscaleしない pyon. layoutが宣言したdimsで出る. 神.

@@ -1,5 +1,6 @@
 import type { Layout } from "./types";
-import { richTextContainer } from "./rich-text";
+import { markdownContainer } from "./rich-text";
+import { parseMarkdown, visibleLength } from "../markdown";
 
 // 02 editorial pyon. magazine margin-note路線. これなら硬いedgeが暴れない.
 
@@ -12,9 +13,7 @@ function tint(hex: string, alpha: number): string {
 }
 
 // column ~650px. editorialは広いぶん気持ち大きめ pyon
-// スペースなし → 1.5倍換算 (cinematic同様)
-function quoteSize(text: string): number {
-  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
+function quoteSize(len: number): number {
   if (len <= 60)  return 68;
   if (len <= 120) return 56;
   if (len <= 200) return 46;
@@ -28,6 +27,9 @@ export const editorial: Layout = {
   render: ({ text, displayName, username, avatar, accent, bg, ink }) => {
     const accentSoft = tint(accent, 0.12);
     const inkFaint = tint(ink, 0.55);
+    const ast = parseMarkdown(text);
+    // markup抜きの見た目文字数でtier決め. スペースなしは1.5倍換算 (cinematic同様) pyon
+    const len = text.includes(" ") ? visibleLength(ast) : Math.round(visibleLength(ast) * 1.5);
 
     return (
     <div
@@ -57,8 +59,10 @@ export const editorial: Layout = {
       {/* content column */}
       <div
         style={{
-          width: 780,
-          height: 630,
+          // ※ 0.63はcontent-box: 旧 780x630+padding が754px柱になってcitationが画面外に沈んでた.
+          // paddingを足すと780x630になる寸法で宣言する pyon
+          width: 654,
+          height: 506,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -91,16 +95,15 @@ export const editorial: Layout = {
           </div>
         </div>
 
-        {richTextContainer(`“${text}”`, {
-          display: "flex",
+        {markdownContainer(ast, {
           maxWidth: 650,
           fontFamily: "Newsreader",
           fontWeight: 400,
-          fontSize: quoteSize(text),
+          fontSize: quoteSize(len),
           lineHeight: 1.1,
           wordBreak: "break-word",
           color: ink,
-        }, quoteSize(text))}
+        }, { size: quoteSize(len), ink, accent, quoted: true })}
 
         {/* citation-style pyon: barはnameの左 */}
         <div style={{ display: "flex", alignItems: "flex-start" }}>
@@ -143,8 +146,9 @@ export const editorial: Layout = {
       {/* inset portrait rail */}
       <div
         style={{
-          width: 420,
-          height: 630,
+          // ※ 同じcontent-box対策: padding込みで420x630 pyon
+          width: 376,
+          height: 554,
           display: "flex",
           position: "relative",
           padding: "38px 44px 38px 0",

@@ -17,6 +17,36 @@ const TRUST_PROXY = process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY =
 // avatar fetch 5s + render 数百ms 想定. これ越えるのは何かおかしい pyon
 const REQ_TIMEOUT_MS = Number(process.env.PYON_REQ_TIMEOUT_MS ?? 15_000);
 
+// 0でcache無効. 明示styleのrequestだけ対象 (省略はrandom roulette なので凍らせない pyon)
+const CACHE_MAX = Number(process.env.PYON_CACHE_MAX ?? 32);
+const quoteCache = new Map<string, { png: Blob; style: string }>();
+
+// insertion-order eviction. render.ts の twemoji cache と同じ流儀 pyon
+function cacheQuote(key: string, val: { png: Blob; style: string }) {
+  if (quoteCache.size >= CACHE_MAX) {
+    const oldest = quoteCache.keys().next().value;
+    if (oldest !== undefined) quoteCache.delete(oldest);
+  }
+  quoteCache.set(key, val);
+}
+
+function quoteCacheKey(data: QuoteRequest): string {
+  const sorted = Object.fromEntries(Object.entries(data).sort(([a], [b]) => (a < b ? -1 : 1)));
+  return new Bun.CryptoHasher("sha256").update(JSON.stringify(sorted)).digest("hex");
+}
+
+function pngResponse(png: Blob, style: string, requestId: string, cache?: "hit" | "miss") {
+  const headers: Record<string, string> = {
+    "content-type": "image/png",
+    // debug用 pyon: どっちのlayoutで描かれたか
+    "x-pyon-style": style,
+    "x-pyon-request-id": requestId,
+    "cache-control": "no-store",
+  };
+  if (cache) headers["x-pyon-cache"] = cache;
+  return new Response(png, { headers });
+}
+
 class RequestTimeoutError extends Error {
   constructor() {
     super("request timeout");
@@ -61,6 +91,12 @@ const server = Bun.serve({
         return jsonError(400, "validation failed", requestId);
       }
 
+      const cacheKey = CACHE_MAX > 0 && parsed.data.style ? quoteCacheKey(parsed.data) : undefined;
+      if (cacheKey) {
+        const hit = quoteCache.get(cacheKey);
+        if (hit) return pngResponse(hit.png, hit.style, requestId, "hit");
+      }
+
       // 重い処理は slot 取ってから. validation 失敗で slot 食わないように順番ここ
       if (!tryAcquireSlot()) return jsonError(503, "busy pyon, try again", requestId);
 
@@ -70,15 +106,8 @@ const server = Bun.serve({
 
       try {
         const { png, style } = await withTimeout(work, REQ_TIMEOUT_MS);
-        return new Response(png, {
-          headers: {
-            "content-type": "image/png",
-            // debug用 pyon: どっちのlayoutで描かれたか
-            "x-pyon-style": style,
-            "x-pyon-request-id": requestId,
-            "cache-control": "no-store",
-          },
-        });
+        if (cacheKey) cacheQuote(cacheKey, { png, style });
+        return pngResponse(png, style, requestId, cacheKey ? "miss" : undefined);
       } catch (err) {
         const timedOut = err instanceof RequestTimeoutError;
         // err.message は SSRF target や internal port状態を oracle 化するので外に出さない pyon

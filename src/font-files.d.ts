@@ -20,7 +20,47 @@ declare module "@fontsource/fraunces/files/fraunces-latin-400-normal.woff" {
   const path: string;
   export default path;
 }
+declare module "@fontsource/fraunces/files/fraunces-latin-600-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/fraunces/files/fraunces-latin-400-italic.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/fraunces/files/fraunces-latin-ext-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/fraunces/files/fraunces-vietnamese-400-normal.woff" {
+  const path: string;
+  export default path;
+}
 declare module "@fontsource/newsreader/files/newsreader-latin-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/newsreader/files/newsreader-latin-600-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/newsreader/files/newsreader-latin-400-italic.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-serif-jp/files/noto-serif-jp-japanese-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-serif-jp/files/noto-serif-jp-cyrillic-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-serif-thai/files/noto-serif-thai-thai-400-normal.woff" {
   const path: string;
   export default path;
 }

@@ -1,5 +1,6 @@
 import type { Layout } from "./types";
-import { richTextContainer } from "./rich-text";
+import { markdownContainer } from "./rich-text";
+import { parseMarkdown, visibleLength } from "../markdown";
 
 // 01 cinematic pyon. 一番ドラマチックなやつ. 解釈一致.
 
@@ -11,9 +12,7 @@ function tint(hex: string, alpha: number): string {
 }
 
 // column ~540px. 感覚値だから見た目おかしかったら普通に直して pyon
-// AAAAAの人対策. スペースなしは横幅食いすぎるので1.5倍換算でtier下げる pyon
-function quoteSize(text: string): number {
-  const len = text.includes(" ") ? text.length : Math.round(text.length * 1.5);
+function quoteSize(len: number): number {
   if (len <= 60)  return 68;
   if (len <= 120) return 52;
   if (len <= 150) return 44;
@@ -27,6 +26,9 @@ export const cinematic: Layout = {
   size: { width: 1200, height: 630 },
   render: ({ text, displayName, username, avatar, accent, bg, ink }) => {
     const inkFaint = tint(ink, 0.55);
+    const ast = parseMarkdown(text);
+    // markup抜きの見た目文字数でtierを決める. スペースなし(AAAAAの人)は1.5倍換算 pyon
+    const len = text.includes(" ") ? visibleLength(ast) : Math.round(visibleLength(ast) * 1.5);
 
     return (
   <div
@@ -83,18 +85,18 @@ export const cinematic: Layout = {
 
       {/* satoriはwidth明示しないとtextAlign完全無視する. 30分溶かした pyon */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 22 }}>
-        {richTextContainer(text, {
+        {markdownContainer(ast, {
           width: 540,
           fontFamily: "Fraunces",
           fontWeight: 400,
-          fontSize: quoteSize(text),
+          fontSize: quoteSize(len),
           lineHeight: 1.18,
           letterSpacing: "-0.02em",
           // 60字超えると詩になる. 実証済み pyon
-          textAlign: text.length <= 60 ? "center" : "left",
+          textAlign: len <= 60 ? "center" : "left",
           wordBreak: "break-word",
           color: ink,
-        }, quoteSize(text))}
+        }, { size: quoteSize(len), ink, accent })}
       </div>
 
       {/* attribution. bar は name の左に置く方が citation っぽく読める pyon */}

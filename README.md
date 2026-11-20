@@ -52,14 +52,28 @@ PNG 返る pyon. サイズは layout 依存 (cinematic/editorial は 1200x630, i
 - **editorial** (1200x630): pink マシマシ、structured、polished
 - **immersion** (1000x1500): portrait pyon. avatar が上 2/3 looming、quote が twilight に乗る、下にドカいbilling name
 
-cinematic と editorial は attribution が `— DisplayName / @handle` の citation-style pyon. immersion は名前ドカン、handle 控えめの movie-poster style.
+cinematic と editorial は attribution が `- DisplayName / @handle` の citation-style pyon. immersion は名前ドカン、handle 控えめの movie-poster style.
 
 immersion は portrait で aspect ratio 違うので random pool には入ってない. bot 側で `style: "immersion"` 明示した時だけ出てくる pyon.
+
+## markdown pyon (0.3.0〜)
+
+text は discord の生 message content をそのまま投げて OK. 読めるもの:
+
+- bold / italic / underline / strike、spoiler は黒塗り bar で隠す (ネタバレ保護は画像でも有効 pyon)
+- inline code pill、code block (ansi escape は剥がす)、block quote、headers `#`〜`###`、subtext `-#`、lists
+- mention / slash command / guild nav / timestamp は pill 化 (名前解決は bot 側未契約なので `@user` 等の generic 表示、timestamp は UTC 固定。これの改善は bot 側と相談中 pyon)
+- custom emoji `<:name:id>` は discord CDN、unicode emoji は twemoji (jdecked v17)
+- masked link は label だけ残す。URL は fetch しない、絶対にだ pyon
+- 日本語・タイ語・簡体字・cyrillic も描ける (noto serif を script ごと on-demand load)。タイ語は ZWSP 縫い込みで単語境界 wrap
+
+文字数 tier は markup 抜きの見た目換算なので、emoji 3個のために font が縮んだりしない pyon.
 
 ## known stuff (読んでおいて pyon)
 
 - variable font だと satori の parser が死ぬ事件あり orz → fontsource の静的 woff per weight に逃げた
-- cache layer まだない、同じquote 2回投げたら2回render する (later pyon〜)
+- satori は 0.63.x pinned (0.10 時代の flex 縛りから卒業)。絶対 width + 横 padding の組は content-box 解釈でズレるので注意 pyon
+- 同じ quote の再 render は `PYON_CACHE_MAX` の LRU が吸う (明示 style のみ。random は毎回新鮮なのが仕様 pyon)
 
 ## env pyon
 
@@ -71,6 +85,7 @@ immersion は portrait で aspect ratio 違うので random pool には入って
 | `PYON_AVATAR_ALLOWED_HOSTS` | `cdn.discordapp.com,media.discordapp.net` | comma-separated. avatarURLで許す host. SSRF対策の核 pyon |
 | `PYON_MAX_CONCURRENT` | `4` | 同時 render 上限. 越えたら 503 (queueしない pyon) |
 | `PYON_REQ_TIMEOUT_MS` | `15000` | 1 request の全体 timeout (ms). 越えたら 504 |
+| `PYON_CACHE_MAX` | `32` | 明示 `style` 付き request の in-process cache 件数. `0` で無効. style 省略 (random) は対象外、roulette は凍らせない pyon |
 
 ## abuse limits pyon
 
