@@ -64,3 +64,15 @@ declare module "@fontsource/noto-serif-thai/files/noto-serif-thai-thai-400-norma
   const path: string;
   export default path;
 }
+declare module "@fontsource/noto-sans-math/files/noto-sans-math-math-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-sans-symbols/files/noto-sans-symbols-symbols-400-normal.woff" {
+  const path: string;
+  export default path;
+}
+declare module "@fontsource/noto-sans-symbols-2/files/noto-sans-symbols-2-symbols-400-normal.woff" {
+  const path: string;
+  export default path;
+}

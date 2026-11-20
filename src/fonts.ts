@@ -23,6 +23,9 @@ import notoJpJpPath from "@fontsource/noto-serif-jp/files/noto-serif-jp-japanese
 import notoJpCyrlPath from "@fontsource/noto-serif-jp/files/noto-serif-jp-cyrillic-400-normal.woff" with { type: "file" };
 import notoScPath from "@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff" with { type: "file" };
 import notoThaiPath from "@fontsource/noto-serif-thai/files/noto-serif-thai-thai-400-normal.woff" with { type: "file" };
+import notoMathPath from "@fontsource/noto-sans-math/files/noto-sans-math-math-400-normal.woff" with { type: "file" };
+import notoSymPath from "@fontsource/noto-sans-symbols/files/noto-sans-symbols-symbols-400-normal.woff" with { type: "file" };
+import notoSym2Path from "@fontsource/noto-sans-symbols-2/files/noto-sans-symbols-2-symbols-400-normal.woff" with { type: "file" };
 
 export type FontSpec = {
   name: string;
@@ -111,10 +114,14 @@ const NOTO_THAI: Face = {
 };
 
 // satoriのfallbackは name ごとに1面しか見ない. 同名で足すと後から来た方が消えるので全部別名 pyon
+// "unknown" locale (→ ✓ ⚠ ★ 等の記号) はlatin fontsに居ないのでmath/symbolsで穴埋め pyon
 const LATIN_EXT: Face[] = [
   { name: "Fraunces Ext", path: frauncesLatinExtPath, file: "fraunces-latin-ext-400-normal.woff" },
   { name: "Fraunces Viet", path: frauncesVietnamesePath, file: "fraunces-vietnamese-400-normal.woff" },
   { name: "Noto Serif Cyrl", path: notoJpCyrlPath, file: "noto-serif-jp-cyrillic-400-normal.woff" },
+  { name: "Noto Math", path: notoMathPath, file: "noto-sans-math-math-400-normal.woff" },
+  { name: "Noto Symbols 2", path: notoSym2Path, file: "noto-sans-symbols-2-symbols-400-normal.woff" },
+  { name: "Noto Symbols", path: notoSymPath, file: "noto-sans-symbols-symbols-400-normal.woff" },
 ];
 
 // 漢字は "ja-JP|zh-CN|zh-TW|zh-HK" でまとめて聞かれる. JPが先に入るので字形は日本、SCは簡体字の穴埋め pyon
